@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from pathlib import Path
@@ -17,6 +18,7 @@ from .pipelines import PipelineCatalog, PipelineCoordinator, current_stage
 from .runtime import Client, install_agents, run_agent
 from .state import ManifestStore, SessionStore
 from .storage import StateError
+from .task_difficulty import ResponseDetail, TaskOverrides, TaskState, classify_task
 from .telemetry import AuditLogger, UsageTracker
 
 
@@ -30,6 +32,16 @@ def find_project_root(start: Path) -> Path:
 
 def _json(value: Any) -> None:
     print(json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False))
+
+
+def _positive_seconds(value: str) -> float:
+    try:
+        seconds = float(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("must be a number") from error
+    if not math.isfinite(seconds) or seconds <= 0:
+        raise argparse.ArgumentTypeError("must be finite and positive")
+    return seconds
 
 
 def _load_config(root: Path) -> dict[str, Any]:
@@ -273,38 +285,82 @@ def command_agents_install(args: argparse.Namespace, root: Path) -> int:
 
 
 def command_run(args: argparse.Namespace, root: Path) -> int:
-    ManifestStore(root).initialize()
-    install_agents(root, args.client)
+    manifest = ManifestStore(root).initialize()
     coordinator = PipelineCoordinator(root)
-    session: dict[str, Any] | None = None
+    active_session: dict[str, Any] | None = None
     try:
-        active = coordinator.resume()
-        if args.pipeline and active["pipeline"] != args.pipeline:
-            message = (
-                f"active pipeline {active['pipeline']} must be completed or failed "
-                f"before {args.pipeline}"
-            )
-            raise StateError(message)
-        session = active
+        active_session = coordinator.resume()
     except StateError as error:
         if "no resumable pipeline" not in str(error) and "no pipeline sessions" not in str(error):
             raise
-        if args.pipeline:
+
+    overrides = TaskOverrides(
+        detail=ResponseDetail(args.detail) if args.detail else None,
+        render_allowed=False if args.no_render else None,
+        deadline_seconds=args.deadline_seconds,
+    )
+    assessment = classify_task(
+        args.request,
+        state=TaskState(
+            target_exists=bool(manifest.get("assets")),
+            active_pipeline=(
+                str(active_session["pipeline"]) if active_session is not None else None
+            ),
+        ),
+        overrides=overrides,
+    )
+    AuditLogger(root).record(
+        event="task-preflight-classified",
+        actor="project-manager",
+        session_id=(str(active_session["id"]) if active_session is not None else None),
+        details=assessment.to_dict(),
+    )
+
+    session: dict[str, Any] | None = None
+    if not assessment.fast_path or args.pipeline:
+        if active_session is not None:
+            if args.pipeline and active_session["pipeline"] != args.pipeline:
+                message = (
+                    f"active pipeline {active_session['pipeline']} must be completed or failed "
+                    f"before {args.pipeline}"
+                )
+                raise StateError(message)
+            session = active_session
+        elif args.pipeline:
             session = coordinator.start(args.pipeline)
-    session_context = (
-        f"Resume GameDev session {session['id']} for {session['pipeline']}. "
-        f"Current stage: {current_stage(session)['id']}."
-        if session
-        else "Select the narrowest matching pipeline and start it with the gamedev CLI before work."
+
+    install_agents(root, args.client)
+    if assessment.fast_path and not args.pipeline:
+        session_context = (
+            "Use the classified fast path without starting or advancing a broad pipeline. "
+            "Inspect authoritative state first and persist any applicable state evidence after "
+            "the targeted verification."
+        )
+    elif session:
+        session_context = (
+            f"Resume GameDev session {session['id']} for {session['pipeline']}. "
+            f"Current stage: {current_stage(session)['id']}."
+        )
+    else:
+        session_context = (
+            "Select the narrowest matching pipeline and start it with the gamedev CLI before work."
+        )
+    execution_instruction = (
+        "Execute only the preflight contract's allowed stages and return concise evidence."
+        if assessment.fast_path and not args.pipeline
+        else (
+            "Use the installed narrow agents and relevant pipeline SOP. Keep state/manifest.json "
+            "and session progress current. Do not merely describe a plan: execute each available "
+            "stage, stopping only for a required human decision or unavailable application."
+        )
     )
     request = (
         f"Project root: {root}\n"
         f"{session_context}\n"
         f"User request: {args.request}\n\n"
-        "Act as the project-manager orchestrator. Use the installed narrow agents and "
-        "relevant pipeline SOP. Keep state/manifest.json and session progress current. "
-        "Do not merely describe a plan: execute each available stage, stopping only for "
-        "a required human decision or unavailable application."
+        f"{assessment.prompt_directive()}\n\n"
+        "Act as the project-manager orchestrator. "
+        f"{execution_instruction}"
     )
     trusted_tools = (
         [item.strip() for item in args.trust_tools.split(",") if item.strip()]
@@ -368,6 +424,21 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "--pipeline",
         choices=["pipeline-scene-to-unity", "pipeline-prop-kit", "pipeline-vertical-slice"],
+    )
+    run.add_argument(
+        "--detail",
+        choices=["brief", "normal", "detailed"],
+        help="override response detail without changing required safety work",
+    )
+    run.add_argument(
+        "--deadline-seconds",
+        type=_positive_seconds,
+        help="active execution deadline; startup and queue time remain separate",
+    )
+    run.add_argument(
+        "--no-render",
+        action="store_true",
+        help="forbid preview and final render stages",
     )
     run.add_argument("--headless", action="store_true", help="run without interactive approvals")
     run.add_argument(

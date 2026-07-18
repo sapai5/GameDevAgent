@@ -142,6 +142,30 @@ The same workflows are available as namespaced Claude Code skills:
 
 Before starting work, the project manager checks for an active session. It resumes existing work instead of creating a duplicate pipeline.
 
+## Adaptive execution budgets
+
+Every `gamedev run` request receives a deterministic Python preflight assessment before an agent starts. The assessment records a schema version, normalized request/state fingerprint, explainable score factors, execution route, allowed and skipped stages, mandatory safety gates, and an execution budget in `logs/audit.jsonl`.
+
+| Difficulty | Default active-time budget | Typical route |
+|---|---:|---|
+| Trivial | 60 seconds | Read/query or one bounded property edit |
+| Small | 3 minutes | Several local edits with targeted checks |
+| Standard | 10 minutes | Multi-object or multi-stage work |
+| Complex | Per-stage estimates | Generation, simulation, final render, or broad composition |
+
+Active mutation time is measured separately from application startup and queue delay. Budget evidence therefore reports predicted versus actual active time without treating a cold Blender start as mutation work. Complex work uses explicit stage estimates and preview checkpoints.
+
+A query or single existing-property edit uses a fast path when no pipeline is explicitly requested. For example, changing an existing Blender scene from 4K to 2K permits only target inspection, safety evaluation, the render-setting mutation, targeted verification, and authoritative-state evidence. It explicitly skips generation, simulation, rendering, export, and broad validation. License, provenance, spatial, approval, and state-integrity gates remain mandatory when applicable.
+
+User constraints override inferred presentation and scheduling policy without bypassing safety:
+
+```bash
+gamedev run --detail brief --deadline-seconds 60 --no-render \
+  "Change the existing Blender scene resolution from 4K to 2K"
+```
+
+The same controls can be expressed in request text with phrases such as `brief`, `detailed`, `do not render`, or `within 60 seconds`.
+
 ## Headless execution
 
 Headless mode uses Claude Code `--print` and grants no trust unless you request it:
