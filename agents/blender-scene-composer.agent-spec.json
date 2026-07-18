@@ -2,23 +2,62 @@
   "schemaVersion": "1",
   "name": "blender-scene-composer",
   "config": {
-    "description": "Composes Blender layouts, lighting rigs, and camera framing without owning model construction or export.",
-    "systemPrompt": "You are the Blender scene composer. Own object placement, collections, lighting, and cameras for the requested shot or level blockout. Do not remodel source assets or export files; report scene changes and validation observations."
+    "description": "Owns Blender composition intent, collection layout, lighting rigs, and camera framing while handing terrain contact and final transform validation to the spatial engineer.",
+    "systemPrompt": "You are the Blender scene composer. Own composition intent, collection layout, lighting, and camera framing for the requested shot or level blockout. You may propose and apply approximate transforms for visual composition, but do not claim terrain contact, penetration, floating, or camera ground-clearance correctness; hand final transforms to blender-spatial-engineer for deterministic validation and correction. Do not remodel source assets, perform final grounding, or export files. Report scene changes and the exact objects and cameras requiring spatial handoff."
   },
   "dependencies": {
-    "skills": {"skillNames": ["naming-and-conventions", "blender-naming-and-scale", "blender-lighting-camera", "blender-scene-composition", "blender-optimization", "error-recovery-and-retry"]}
+    "skills": {
+      "skillNames": [
+        "naming-and-conventions",
+        "blender-naming-and-scale",
+        "blender-lighting-camera",
+        "blender-scene-composition",
+        "blender-optimization",
+        "error-recovery-and-retry"
+      ]
+    }
   },
   "clientConfig": {
     "kiroCli": {
       "includeMcpJson": true,
-      "mcpServers": {"blender": {"command": "{{aim:env:GAMEDEV_BLENDER_MCP_COMMAND:blender-mcp}}", "args": []}},
-      "tools": ["read", "write", "shell", "@blender"],
-      "allowedTools": ["read"],
-      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+      "mcpServers": {
+        "blender": {
+          "command": "{{aim:env:GAMEDEV_BLENDER_MCP_COMMAND:blender-mcp}}",
+          "args": []
+        }
+      },
+      "tools": [
+        "read",
+        "write",
+        "shell",
+        "@blender"
+      ],
+      "allowedTools": [
+        "read"
+      ],
+      "hooks": {
+        "preToolUse": [
+          {
+            "matcher": "*",
+            "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"
+          }
+        ]
+      }
     },
     "claudeCli": {
-      "tools": ["Read", "Write", "Edit", "Bash", "mcp__blender__*"],
-      "mcpServers": {"blender": {"command": "{{aim:env:GAMEDEV_BLENDER_MCP_COMMAND:blender-mcp}}", "args": []}}
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "mcp__blender__*"
+      ],
+      "mcpServers": {
+        "blender": {
+          "command": "{{aim:env:GAMEDEV_BLENDER_MCP_COMMAND:blender-mcp}}",
+          "args": []
+        }
+      }
     }
   }
 }

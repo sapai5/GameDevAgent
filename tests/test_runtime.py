@@ -36,8 +36,8 @@ class RuntimeAdapterTests(unittest.TestCase):
             installed = install_claude_plugin(self.root)
 
         plugin = (self.root / ".claude" / "skills" / "gamedev-agent").resolve()
-        self.assertEqual(13, len(list((plugin / "agents").glob("*.md"))))
-        self.assertEqual(32, len(list((plugin / "skills").glob("*/SKILL.md"))))
+        self.assertEqual(14, len(list((plugin / "agents").glob("*.md"))))
+        self.assertEqual(33, len(list((plugin / "skills").glob("*/SKILL.md"))))
         self.assertIn(plugin / ".claude-plugin" / "plugin.json", installed)
         manifest = json.loads((plugin / ".claude-plugin" / "plugin.json").read_text())
         self.assertEqual("gamedev-agent", manifest["name"])
@@ -50,9 +50,19 @@ class RuntimeAdapterTests(unittest.TestCase):
 
         manager = (plugin / "agents" / "project-manager.md").read_text()
         modeler = (plugin / "agents" / "blender-modeler.md").read_text()
+        spatial = (plugin / "agents" / "blender-spatial-engineer.md").read_text()
         self.assertIn('"Agent"', manager)
         self.assertIn('"pipeline-scene-to-unity"', manager)
+        self.assertIn("blender-spatial-engineer", manager)
         self.assertIn("mcp__plugin_gamedev-agent_blender__*", modeler)
+        self.assertIn("mcp__plugin_gamedev-agent_blender__*", spatial)
+        source_validator = (
+            REPOSITORY / "skills" / "blender-spatial-placement" / "scripts" / "validate_spatial.py"
+        )
+        plugin_validator = (
+            plugin / "skills" / "blender-spatial-placement" / "scripts" / "validate_spatial.py"
+        )
+        self.assertEqual(source_validator.read_bytes(), plugin_validator.read_bytes())
 
         mcp = json.loads((plugin / ".mcp.json").read_text())
         self.assertEqual({"blender", "unity"}, set(mcp["mcpServers"]))
@@ -61,11 +71,27 @@ class RuntimeAdapterTests(unittest.TestCase):
         self.assertTrue((plugin / "hooks" / "pre_tool_use.py").is_file())
 
     def test_install_agents_keeps_kiro_adapter_backward_compatible(self) -> None:
-        installed = install_agents(self.root, "kiro")
-        self.assertEqual(13, len(installed))
+        with mock.patch.dict(os.environ, {"GAMEDEV_BLENDER_MCP_COMMAND": "/usr/bin/true"}):
+            installed = install_agents(self.root, "kiro")
+        self.assertEqual(14, len(installed))
         manager = json.loads((self.root / ".kiro" / "agents" / "project-manager.json").read_text())
         self.assertEqual("project-manager", manager["name"])
         self.assertIn("subagent", manager["tools"])
+        self.assertIn(
+            "blender-spatial-engineer",
+            manager["toolsSettings"]["subagent"]["availableAgents"],
+        )
+
+        spatial = json.loads(
+            (self.root / ".kiro" / "agents" / "blender-spatial-engineer.json").read_text()
+        )
+        self.assertEqual(["read", "@blender"], spatial["tools"])
+        self.assertEqual(["read"], spatial["allowedTools"])
+        self.assertIn("blender", spatial["mcpServers"])
+        self.assertIn(
+            "skill://../../skills/blender-spatial-placement/SKILL.md",
+            spatial["resources"],
+        )
 
     def test_generators_replace_stale_outputs_deterministically(self) -> None:
         def contents(directory: Path) -> dict[str, bytes]:

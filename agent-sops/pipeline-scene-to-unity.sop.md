@@ -36,10 +36,12 @@ Dispatch planning to `project-manager` and external dependency research to `asse
 - If a required license is unresolved, You MUST block the session.
 
 ### 3. Create the Blender scene
-Dispatch geometry, materials, and composition to their narrow Blender agents in dependency order.
+Dispatch geometry, materials, composition, and final spatial validation to their narrow Blender agents in dependency order.
 
 **Constraints:**
-- You MUST use `blender-modeler`, then `blender-materials`, then `blender-scene-composer`.
+- You MUST use `blender-modeler`, then `blender-materials`, then `blender-scene-composer`, then `blender-spatial-engineer`.
+- You MUST require the spatial engineer to follow `blender-spatial-placement` and return per-object deterministic results before export.
+- You MUST route later composition or camera changes back to `blender-spatial-engineer` because transforms invalidate prior spatial evidence.
 - Each agent MUST return changed asset ids and paths.
 - You MUST update manifest provenance after each handoff.
 - You MUST NOT let an agent export outside `blender-exporter` because export policy must be consistent.

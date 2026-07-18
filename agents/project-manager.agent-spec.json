@@ -3,22 +3,93 @@
   "name": "project-manager",
   "config": {
     "description": "Plans and orchestrates persistent GameDevAgent pipelines, routes work to narrow specialists, maintains state, and enforces license and approval gates.",
-    "systemPrompt": "You are the GameDev project manager and sole orchestrator. Convert requests into bounded pipelines, resume existing sessions before starting duplicates, delegate only to the declared specialists, keep state/manifest.json authoritative, and require deterministic evidence at each gate. Never perform specialist work yourself and never bypass a failed license, QA, overwrite, deletion, or Git approval gate."
+    "systemPrompt": "You are the GameDev project manager and sole orchestrator. Convert requests into bounded pipelines, resume existing sessions before starting duplicates, delegate only to the declared specialists, keep state/manifest.json authoritative, and require deterministic evidence at each gate. Route every Blender scene through blender-spatial-engineer after composition and route later composition or camera changes back for final spatial validation. Never accept a spatial PASS without evaluated world-space geometry, terrain raycasts or declared support planes, and per-object measurements. Never perform specialist work yourself and never bypass a failed license, spatial, QA, overwrite, deletion, or Git approval gate."
   },
   "dependencies": {
-    "skills": {"skillNames": ["naming-and-conventions", "license-compliance", "qa-checklist", "error-recovery-and-retry"]},
-    "agentSops": {"agentSopNames": ["pipeline-scene-to-unity", "pipeline-prop-kit", "pipeline-vertical-slice"]},
-    "subagents": {"agentNames": ["blender-modeler", "blender-materials", "blender-scene-composer", "blender-exporter", "unity-scene-builder", "unity-gameplay-programmer", "unity-physics-engineer", "unity-ui-programmer", "unity-build-engineer", "unity-qa-tester", "asset-researcher", "release-engineer"]}
+    "skills": {
+      "skillNames": [
+        "naming-and-conventions",
+        "license-compliance",
+        "qa-checklist",
+        "error-recovery-and-retry"
+      ]
+    },
+    "agentSops": {
+      "agentSopNames": [
+        "pipeline-scene-to-unity",
+        "pipeline-prop-kit",
+        "pipeline-vertical-slice"
+      ]
+    },
+    "subagents": {
+      "agentNames": [
+        "blender-modeler",
+        "blender-materials",
+        "blender-scene-composer",
+        "blender-spatial-engineer",
+        "blender-exporter",
+        "unity-scene-builder",
+        "unity-gameplay-programmer",
+        "unity-physics-engineer",
+        "unity-ui-programmer",
+        "unity-build-engineer",
+        "unity-qa-tester",
+        "asset-researcher",
+        "release-engineer"
+      ]
+    }
   },
   "clientConfig": {
     "kiroCli": {
-      "tools": ["read", "write", "shell", "subagent"],
-      "allowedTools": ["read"],
-      "toolsSettings": {"subagent": {"availableAgents": ["blender-modeler", "blender-materials", "blender-scene-composer", "blender-exporter", "unity-scene-builder", "unity-gameplay-programmer", "unity-physics-engineer", "unity-ui-programmer", "unity-build-engineer", "unity-qa-tester", "asset-researcher", "release-engineer"], "trustedAgents": ["asset-researcher", "unity-qa-tester"]}},
-      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+      "tools": [
+        "read",
+        "write",
+        "shell",
+        "subagent"
+      ],
+      "allowedTools": [
+        "read"
+      ],
+      "toolsSettings": {
+        "subagent": {
+          "availableAgents": [
+            "blender-modeler",
+            "blender-materials",
+            "blender-scene-composer",
+            "blender-spatial-engineer",
+            "blender-exporter",
+            "unity-scene-builder",
+            "unity-gameplay-programmer",
+            "unity-physics-engineer",
+            "unity-ui-programmer",
+            "unity-build-engineer",
+            "unity-qa-tester",
+            "asset-researcher",
+            "release-engineer"
+          ],
+          "trustedAgents": [
+            "asset-researcher",
+            "unity-qa-tester"
+          ]
+        }
+      },
+      "hooks": {
+        "preToolUse": [
+          {
+            "matcher": "*",
+            "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"
+          }
+        ]
+      }
     },
     "claudeCli": {
-      "tools": ["Read", "Write", "Edit", "Bash", "Agent"]
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Agent"
+      ]
     }
   }
 }

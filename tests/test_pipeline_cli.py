@@ -47,7 +47,7 @@ class PipelineAndCliTests(unittest.TestCase):
         )
         coordinator = PipelineCoordinator(self.root)
         session = coordinator.start("pipeline-scene-to-unity")
-        for _ in range(5):
+        for _ in range(6):
             coordinator.advance(session["id"], "project-manager")
         with self.assertRaisesRegex(StateError, "license gate failed"):
             coordinator.advance(session["id"], "blender-exporter")
@@ -56,7 +56,7 @@ class PipelineAndCliTests(unittest.TestCase):
     def test_final_stage_requires_one_time_human_approval(self) -> None:
         coordinator = PipelineCoordinator(self.root)
         session = coordinator.start("pipeline-scene-to-unity")
-        for _ in range(8):
+        for _ in range(9):
             session = coordinator.advance(session["id"], "project-manager")
         resource = f"{session['id']}:release"
         with self.assertRaisesRegex(StateError, "approval gate failed"):
@@ -66,6 +66,19 @@ class PipelineAndCliTests(unittest.TestCase):
         )
         completed = coordinator.advance(session["id"], "release-engineer")
         self.assertEqual("completed", completed["status"])
+
+    def test_spatial_gate_precedes_export_in_every_blender_pipeline(self) -> None:
+        for pipeline_name in (
+            "pipeline-scene-to-unity",
+            "pipeline-vertical-slice",
+            "pipeline-prop-kit",
+        ):
+            definition = json.loads((self.root / "pipelines" / f"{pipeline_name}.json").read_text())
+            agents = [stage["agent"] for stage in definition["stages"]]
+            self.assertEqual(1, agents.count("blender-spatial-engineer"), pipeline_name)
+            spatial_index = agents.index("blender-spatial-engineer")
+            export_index = agents.index("blender-exporter")
+            self.assertEqual(export_index - 1, spatial_index, pipeline_name)
 
     def test_cli_status_and_resume_emit_structured_json(self) -> None:
         session = PipelineCoordinator(self.root).start("pipeline-prop-kit")

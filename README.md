@@ -1,10 +1,11 @@
 # GameDevAgent for Claude Code
 
-GameDevAgent is a native Claude Code plugin and local CLI for building Blender assets, importing validated exports into Unity, and developing playable game slices across multiple sessions. A project-manager agent coordinates 12 narrow specialists while the CLI persists asset provenance, pipeline progress, approvals, and audit records on disk.
+GameDevAgent is a native Claude Code plugin and local CLI for building Blender assets, importing validated exports into Unity, and developing playable game slices across multiple sessions. A project-manager agent coordinates 13 narrow specialists while the CLI persists asset provenance, pipeline progress, approvals, and audit records on disk.
 
 ## Capabilities
 
 - Creates Blender geometry, materials, UVs, lighting, cameras, and composed scenes through Blender MCP.
+- Corrects terrain contact, hierarchy transforms, object penetration or floating, support anchors, and terrain-relative camera height with deterministic Blender-side validation.
 - Exports validated glTF or FBX assets and imports them into Unity through Unity MCP.
 - Builds Unity scenes, prefabs, gameplay, physics, UI, audio, platform settings, and testable builds.
 - Uses Claude Code `WebSearch` and `WebFetch` to research open-source assets and libraries.
@@ -16,8 +17,8 @@ GameDevAgent is a native Claude Code plugin and local CLI for building Blender a
 
 The generated plugin contains:
 
-- 13 focused agents in `agents/`
-- 29 shared game-development skills
+- 14 focused agents in `agents/`
+- 30 shared game-development skills
 - 3 executable pipeline skills generated from the repository SOPs
 - Plugin-level `PreToolUse` safety hooks
 - Optional `blender` and `unity` MCP server declarations
@@ -103,7 +104,7 @@ The project-manager delegates work to these plugin subagents:
 
 | Area | Agents |
 |---|---|
-| Blender | `blender-modeler`, `blender-materials`, `blender-scene-composer`, `blender-exporter` |
+| Blender | `blender-modeler`, `blender-materials`, `blender-scene-composer`, `blender-spatial-engineer`, `blender-exporter` |
 | Unity | `unity-scene-builder`, `unity-gameplay-programmer`, `unity-physics-engineer`, `unity-ui-programmer`, `unity-build-engineer`, `unity-qa-tester` |
 | Cross-cutting | `asset-researcher`, `release-engineer` |
 

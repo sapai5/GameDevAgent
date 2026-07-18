@@ -3,14 +3,61 @@
   "name": "pipeline-scene-to-unity",
   "description": "Create a Blender scene, export validated assets, import them into Unity, and run QA.",
   "stages": [
-    {"id": "plan", "agent": "project-manager", "instructions": "Define scope, asset ids, budgets, and acceptance criteria."},
-    {"id": "research", "agent": "asset-researcher", "instructions": "Research only required OSS dependencies and record provenance and licenses."},
-    {"id": "model", "agent": "blender-modeler", "instructions": "Create named, correctly scaled geometry and update the manifest."},
-    {"id": "materials", "agent": "blender-materials", "instructions": "Create PBR materials, UVs, and texture references."},
-    {"id": "compose", "agent": "blender-scene-composer", "instructions": "Compose layout, lighting, and camera framing."},
-    {"id": "export", "agent": "blender-exporter", "instructions": "Validate and export without overwriting unapproved files.", "completion_gates": ["licenses-verified"]},
-    {"id": "unity-import", "agent": "unity-scene-builder", "instructions": "Import assets and assemble prefabs and the Unity scene."},
-    {"id": "qa", "agent": "unity-qa-tester", "instructions": "Enter play mode, inspect console output, and report pass or fail."},
-    {"id": "release", "agent": "release-engineer", "instructions": "Validate repository hygiene and prepare a meaningful commit.", "completion_gates": ["human-approval"]}
+    {
+      "id": "plan",
+      "agent": "project-manager",
+      "instructions": "Define scope, asset ids, budgets, and acceptance criteria."
+    },
+    {
+      "id": "research",
+      "agent": "asset-researcher",
+      "instructions": "Research only required OSS dependencies and record provenance and licenses."
+    },
+    {
+      "id": "model",
+      "agent": "blender-modeler",
+      "instructions": "Create named, correctly scaled geometry and update the manifest."
+    },
+    {
+      "id": "materials",
+      "agent": "blender-materials",
+      "instructions": "Create PBR materials, UVs, and texture references."
+    },
+    {
+      "id": "compose",
+      "agent": "blender-scene-composer",
+      "instructions": "Compose layout, lighting, and camera framing."
+    },
+    {
+      "id": "spatial-validate",
+      "agent": "blender-spatial-engineer",
+      "instructions": "Correct and validate terrain contact, hierarchy transforms, penetration or floating, rock burial, and terrain-relative camera clearance with evaluated world-space evidence."
+    },
+    {
+      "id": "export",
+      "agent": "blender-exporter",
+      "instructions": "Validate and export without overwriting unapproved files.",
+      "completion_gates": [
+        "licenses-verified"
+      ]
+    },
+    {
+      "id": "unity-import",
+      "agent": "unity-scene-builder",
+      "instructions": "Import assets and assemble prefabs and the Unity scene."
+    },
+    {
+      "id": "qa",
+      "agent": "unity-qa-tester",
+      "instructions": "Enter play mode, inspect console output, and report pass or fail."
+    },
+    {
+      "id": "release",
+      "agent": "release-engineer",
+      "instructions": "Validate repository hygiene and prepare a meaningful commit.",
+      "completion_gates": [
+        "human-approval"
+      ]
+    }
   ]
 }

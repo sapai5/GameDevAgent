@@ -50,10 +50,12 @@ Dispatch validated geometry to `blender-materials`.
 - You MUST record all texture provenance and license evidence.
 - You MUST return per-asset validation results so one failure cannot hide in an aggregate pass.
 
-### 5. Optimize and export
-Dispatch each complete asset to `blender-exporter`.
+### 5. Validate support and export
+Dispatch each complete asset to `blender-spatial-engineer` for support-anchor validation, then to `blender-exporter`.
 
 **Constraints:**
+- You MUST require `blender-spatial-engineer` to validate evaluated support geometry, hierarchy transforms, and the declared local support plane before export.
+- You MUST treat missing contact geometry as blocked because an origin-only check cannot prove stable placement.
 - You MUST enforce license, transform, origin, naming, poly, and material-slot gates.
 - You MUST request approval for each existing destination before overwrite.
 - You MUST record one export path and checksum per manifest asset.

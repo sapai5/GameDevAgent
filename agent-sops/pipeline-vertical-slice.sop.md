@@ -34,9 +34,11 @@ Dispatch required asset and library research to `asset-researcher`.
 - You MUST block unresolved dependencies instead of substituting untracked content.
 
 ### 3. Create and export minimum art
-Dispatch environment geometry, look development, composition, and export to the four Blender agents in order.
+Dispatch environment geometry, look development, composition, spatial validation, and export to the five Blender agents in order.
 
 **Constraints:**
+- You MUST use `blender-modeler`, then `blender-materials`, then `blender-scene-composer`, then `blender-spatial-engineer`, then `blender-exporter`.
+- You MUST require the spatial engineer to follow `blender-spatial-placement` and return per-object deterministic results before export.
 - You MUST minimize assets to those required by the player loop.
 - You MUST enforce shared ids, dimensions, budgets, and target render-pipeline material rules.
 - You MUST record Blender source, export path, checksum, provenance, and verified license per asset.

@@ -4,10 +4,18 @@
     {
       "id": "scene-request-routing",
       "prompt": "Create a Blender scene and bring it into Unity with a QA pass.",
-      "expected_outcome": "The scene pipeline exists and all 13 narrow agents are available.",
+      "expected_outcome": "The scene pipeline exists and all 14 narrow agents are available.",
       "assertions": [
-        {"type": "path-exists", "path": "pipelines/pipeline-scene-to-unity.json", "expected": true},
-        {"type": "glob-count", "pattern": "agents/*.agent-spec.json", "expected": 13}
+        {
+          "type": "path-exists",
+          "path": "pipelines/pipeline-scene-to-unity.json",
+          "expected": true
+        },
+        {
+          "type": "glob-count",
+          "pattern": "agents/*.agent-spec.json",
+          "expected": 14
+        }
       ]
     },
     {
@@ -15,8 +23,16 @@
       "prompt": "Create ten consistent forest props and Unity prefabs.",
       "expected_outcome": "The batch pipeline and all granular skills are present.",
       "assertions": [
-        {"type": "path-exists", "path": "pipelines/pipeline-prop-kit.json", "expected": true},
-        {"type": "glob-count", "pattern": "skills/*/SKILL.md", "expected": 29}
+        {
+          "type": "path-exists",
+          "path": "pipelines/pipeline-prop-kit.json",
+          "expected": true
+        },
+        {
+          "type": "glob-count",
+          "pattern": "skills/*/SKILL.md",
+          "expected": 30
+        }
       ]
     },
     {
@@ -24,8 +40,17 @@
       "prompt": "Build one level, one mechanic, basic polish, a build, and QA.",
       "expected_outcome": "The vertical-slice pipeline and versioned manifest schema are available.",
       "assertions": [
-        {"type": "path-exists", "path": "pipelines/pipeline-vertical-slice.json", "expected": true},
-        {"type": "json-value", "path": "state/manifest.json", "pointer": "/schema_version", "expected": 1}
+        {
+          "type": "path-exists",
+          "path": "pipelines/pipeline-vertical-slice.json",
+          "expected": true
+        },
+        {
+          "type": "json-value",
+          "path": "state/manifest.json",
+          "pointer": "/schema_version",
+          "expected": 1
+        }
       ]
     },
     {
@@ -33,8 +58,15 @@
       "prompt": "Delete an object and force-export over the prior artifact.",
       "expected_outcome": "No mutation-class tool is globally pre-approved by an agent spec.",
       "assertions": [
-        {"type": "agent-safe-defaults", "expected": true},
-        {"type": "path-exists", "path": "hooks/pre_tool_use.py", "expected": true}
+        {
+          "type": "agent-safe-defaults",
+          "expected": true
+        },
+        {
+          "type": "path-exists",
+          "path": "hooks/pre_tool_use.py",
+          "expected": true
+        }
       ]
     },
     {
@@ -42,9 +74,62 @@
       "prompt": "Install and run the shared GameDevAgent capabilities with Claude Code.",
       "expected_outcome": "Shared specs declare Claude tools and the native plugin adapter is available.",
       "assertions": [
-        {"type": "json-value", "path": "agents/project-manager.agent-spec.json", "pointer": "/clientConfig/claudeCli/tools/4", "expected": "Agent"},
-        {"type": "path-exists", "path": "src/gamedev_agent/runtime.py", "expected": true},
-        {"type": "path-exists", "path": "hooks/pre_tool_use.py", "expected": true}
+        {
+          "type": "json-value",
+          "path": "agents/project-manager.agent-spec.json",
+          "pointer": "/clientConfig/claudeCli/tools/4",
+          "expected": "Agent"
+        },
+        {
+          "type": "path-exists",
+          "path": "src/gamedev_agent/runtime.py",
+          "expected": true
+        },
+        {
+          "type": "path-exists",
+          "path": "hooks/pre_tool_use.py",
+          "expected": true
+        }
+      ]
+    },
+    {
+      "id": "deterministic-spatial-placement",
+      "prompt": "Validate that trees touch uneven terrain and the camera is above local ground.",
+      "expected_outcome": "A narrow Blender spatial specialist, deterministic validator, and pre-export pipeline gate are available.",
+      "assertions": [
+        {
+          "type": "path-exists",
+          "path": "agents/blender-spatial-engineer.agent-spec.json",
+          "expected": true
+        },
+        {
+          "type": "path-exists",
+          "path": "skills/blender-spatial-placement/SKILL.md",
+          "expected": true
+        },
+        {
+          "type": "path-exists",
+          "path": "skills/blender-spatial-placement/scripts/validate_spatial.py",
+          "expected": true
+        },
+        {
+          "type": "json-value",
+          "path": "agents/project-manager.agent-spec.json",
+          "pointer": "/dependencies/subagents/agentNames/3",
+          "expected": "blender-spatial-engineer"
+        },
+        {
+          "type": "json-value",
+          "path": "agents/blender-spatial-engineer.agent-spec.json",
+          "pointer": "/clientConfig/kiroCli/allowedTools/0",
+          "expected": "read"
+        },
+        {
+          "type": "json-value",
+          "path": "pipelines/pipeline-scene-to-unity.json",
+          "pointer": "/stages/5/agent",
+          "expected": "blender-spatial-engineer"
+        }
       ]
     }
   ]

@@ -3,18 +3,81 @@
   "name": "pipeline-vertical-slice",
   "description": "Build an MVP-sized level with one core mechanic and basic polish.",
   "stages": [
-    {"id": "slice-plan", "agent": "project-manager", "instructions": "Freeze the player loop, acceptance criteria, platform, budgets, and out-of-scope list."},
-    {"id": "asset-research", "agent": "asset-researcher", "instructions": "Research only dependencies required by the frozen slice."},
-    {"id": "environment-assets", "agent": "blender-modeler", "instructions": "Create the minimum environment and interaction assets."},
-    {"id": "look-development", "agent": "blender-materials", "instructions": "Create PBR look development within the target render pipeline."},
-    {"id": "level-compose", "agent": "blender-scene-composer", "instructions": "Compose visual layout and exportable scene references."},
-    {"id": "export", "agent": "blender-exporter", "instructions": "Export validated assets and record checksums.", "completion_gates": ["licenses-verified"]},
-    {"id": "unity-level", "agent": "unity-scene-builder", "instructions": "Build the level and prefabs from manifest paths."},
-    {"id": "gameplay", "agent": "unity-gameplay-programmer", "instructions": "Implement the single core mechanic with the Input System."},
-    {"id": "physics", "agent": "unity-physics-engineer", "instructions": "Configure collision, movement, and interaction physics."},
-    {"id": "ui", "agent": "unity-ui-programmer", "instructions": "Add the minimum HUD, pause, and feedback UI."},
-    {"id": "build", "agent": "unity-build-engineer", "instructions": "Set target platform, build settings, and create a development build."},
-    {"id": "qa", "agent": "unity-qa-tester", "instructions": "Run play-mode acceptance checks, capture console failures, and report regression status."},
-    {"id": "release", "agent": "release-engineer", "instructions": "Verify hygiene, generated-file exclusions, LFS, and prepare release history.", "completion_gates": ["human-approval"]}
+    {
+      "id": "slice-plan",
+      "agent": "project-manager",
+      "instructions": "Freeze the player loop, acceptance criteria, platform, budgets, and out-of-scope list."
+    },
+    {
+      "id": "asset-research",
+      "agent": "asset-researcher",
+      "instructions": "Research only dependencies required by the frozen slice."
+    },
+    {
+      "id": "environment-assets",
+      "agent": "blender-modeler",
+      "instructions": "Create the minimum environment and interaction assets."
+    },
+    {
+      "id": "look-development",
+      "agent": "blender-materials",
+      "instructions": "Create PBR look development within the target render pipeline."
+    },
+    {
+      "id": "level-compose",
+      "agent": "blender-scene-composer",
+      "instructions": "Compose visual layout and exportable scene references."
+    },
+    {
+      "id": "spatial-validate",
+      "agent": "blender-spatial-engineer",
+      "instructions": "Correct and validate final environment grounding and terrain-relative camera clearance before export."
+    },
+    {
+      "id": "export",
+      "agent": "blender-exporter",
+      "instructions": "Export validated assets and record checksums.",
+      "completion_gates": [
+        "licenses-verified"
+      ]
+    },
+    {
+      "id": "unity-level",
+      "agent": "unity-scene-builder",
+      "instructions": "Build the level and prefabs from manifest paths."
+    },
+    {
+      "id": "gameplay",
+      "agent": "unity-gameplay-programmer",
+      "instructions": "Implement the single core mechanic with the Input System."
+    },
+    {
+      "id": "physics",
+      "agent": "unity-physics-engineer",
+      "instructions": "Configure collision, movement, and interaction physics."
+    },
+    {
+      "id": "ui",
+      "agent": "unity-ui-programmer",
+      "instructions": "Add the minimum HUD, pause, and feedback UI."
+    },
+    {
+      "id": "build",
+      "agent": "unity-build-engineer",
+      "instructions": "Set target platform, build settings, and create a development build."
+    },
+    {
+      "id": "qa",
+      "agent": "unity-qa-tester",
+      "instructions": "Run play-mode acceptance checks, capture console failures, and report regression status."
+    },
+    {
+      "id": "release",
+      "agent": "release-engineer",
+      "instructions": "Verify hygiene, generated-file exclusions, LFS, and prepare release history.",
+      "completion_gates": [
+        "human-approval"
+      ]
+    }
   ]
 }
