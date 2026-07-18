@@ -13,6 +13,9 @@
       "tools": ["read", "write", "web_search", "web_fetch"],
       "allowedTools": ["read", "web_search", "web_fetch"],
       "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    },
+    "claudeCli": {
+      "tools": ["Read", "Write", "Edit", "WebSearch", "WebFetch"]
     }
   }
 }

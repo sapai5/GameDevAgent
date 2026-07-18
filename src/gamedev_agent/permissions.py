@@ -1,4 +1,4 @@
-"""Human approval records and Kiro pre-tool safety classification."""
+"""Human approval records and cross-client pre-tool safety classification."""
 
 from __future__ import annotations
 
@@ -84,7 +84,7 @@ def classify_event(event: dict[str, Any]) -> DestructiveOperation | None:
     if not isinstance(tool_input, dict):
         tool_input = {}
     command = str(tool_input.get("command", ""))
-    if tool_name in {"shell", "execute_bash"}:
+    if tool_name.lower() in {"shell", "execute_bash", "bash"}:
         if _FORCE_PUSH.search(command):
             return DestructiveOperation(
                 "git.force-push", command, "force-push can rewrite shared history"

@@ -14,6 +14,9 @@
       "allowedTools": ["read"],
       "toolsSettings": {"shell": {"deniedCommands": ["git push.*", "git reset --hard.*", "git clean.*", "git branch -D.*", "git commit --amend.*"], "autoAllowReadonly": true}},
       "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    },
+    "claudeCli": {
+      "tools": ["Read", "Write", "Edit", "Bash"]
     }
   }
 }

@@ -15,6 +15,10 @@
       "tools": ["read", "shell", "@unity"],
       "allowedTools": ["read"],
       "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    },
+    "claudeCli": {
+      "tools": ["Read", "Bash", "mcp__unity__*"],
+      "mcpServers": {"unity": {"command": "{{aim:env:GAMEDEV_UNITY_MCP_COMMAND:unity-mcp}}", "args": []}}
     }
   }
 }

@@ -36,6 +36,16 @@
         {"type": "agent-safe-defaults", "expected": true},
         {"type": "path-exists", "path": "hooks/pre_tool_use.py", "expected": true}
       ]
+    },
+    {
+      "id": "cross-client-adapters",
+      "prompt": "Install and run the shared GameDevAgent capabilities with Claude Code.",
+      "expected_outcome": "Shared specs declare Claude tools and the native plugin adapter is available.",
+      "assertions": [
+        {"type": "json-value", "path": "agents/project-manager.agent-spec.json", "pointer": "/clientConfig/claudeCli/tools/4", "expected": "Agent"},
+        {"type": "path-exists", "path": "src/gamedev_agent/runtime.py", "expected": true},
+        {"type": "path-exists", "path": "hooks/pre_tool_use.py", "expected": true}
+      ]
     }
   ]
 }

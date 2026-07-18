@@ -7,14 +7,14 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from . import __version__
 from .evals import EvaluationRunner
 from .mcp import HttpJsonRpcTransport, McpAdapter, McpError
 from .permissions import ApprovalStore
 from .pipelines import PipelineCatalog, PipelineCoordinator, current_stage
-from .runtime import install_local_agents, run_agent
+from .runtime import Client, install_agents, run_agent
 from .state import ManifestStore, SessionStore
 from .storage import StateError
 from .telemetry import AuditLogger, UsageTracker
@@ -261,14 +261,20 @@ def command_eval(args: argparse.Namespace, root: Path) -> int:
 
 
 def command_agents_install(args: argparse.Namespace, root: Path) -> int:
-    installed = install_local_agents(root)
-    _json({"installed": [path.relative_to(root).as_posix() for path in installed]})
+    clients = ("kiro", "claude") if args.client == "all" else (args.client,)
+    installed = {
+        client: [
+            path.relative_to(root).as_posix() for path in install_agents(root, cast(Client, client))
+        ]
+        for client in clients
+    }
+    _json({"installed": installed})
     return 0
 
 
 def command_run(args: argparse.Namespace, root: Path) -> int:
     ManifestStore(root).initialize()
-    install_local_agents(root)
+    install_agents(root, args.client)
     coordinator = PipelineCoordinator(root)
     session: dict[str, Any] | None = None
     try:
@@ -309,6 +315,7 @@ def command_run(args: argparse.Namespace, root: Path) -> int:
         root,
         prompt=request,
         agent="project-manager",
+        client=args.client,
         headless=args.headless,
         trusted_tools=trusted_tools,
     )
@@ -353,6 +360,12 @@ def build_parser() -> argparse.ArgumentParser:
     run = commands.add_parser("run", help="execute a request through the project-manager agent")
     run.add_argument("request", help="the game-development outcome to create")
     run.add_argument(
+        "--client",
+        choices=["kiro", "claude"],
+        default="kiro",
+        help="agent client to run; defaults to kiro",
+    )
+    run.add_argument(
         "--pipeline",
         choices=["pipeline-scene-to-unity", "pipeline-prop-kit", "pipeline-vertical-slice"],
     )
@@ -363,9 +376,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     run.set_defaults(handler=command_run)
 
-    agents = commands.add_parser("agents", help="install repository specs as local Kiro agents")
+    agents = commands.add_parser("agents", help="install repository specs for supported clients")
     agent_commands = agents.add_subparsers(dest="agents_command", required=True)
     install = agent_commands.add_parser("install")
+    install.add_argument(
+        "--client",
+        choices=["kiro", "claude", "all"],
+        default="kiro",
+        help="client adapter to generate; defaults to kiro",
+    )
     install.set_defaults(handler=command_agents_install)
 
     asset = commands.add_parser("asset", help="manage traceable assets")

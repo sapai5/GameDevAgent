@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Kiro preToolUse hook: block destructive operations without one-time approval."""
+"""Cross-client pre-tool hook: block destructive operations without one-time approval."""
 
 from __future__ import annotations
 

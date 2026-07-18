@@ -41,9 +41,12 @@ class PermissionTests(unittest.TestCase):
         allowed, _ = evaluate_event(self.root, event)
         self.assertFalse(allowed)
 
-    def test_force_push_and_export_overwrite_are_classified(self) -> None:
+    def test_force_push_and_export_overwrite_are_classified_for_both_clients(self) -> None:
         force = classify_event(
             {"tool_name": "shell", "tool_input": {"command": "git push --force origin feature"}}
+        )
+        claude_force = classify_event(
+            {"tool_name": "Bash", "tool_input": {"command": "git reset --hard HEAD~1"}}
         )
         overwrite = classify_event(
             {
@@ -52,6 +55,7 @@ class PermissionTests(unittest.TestCase):
             }
         )
         self.assertEqual("git.force-push", force.operation if force else None)
+        self.assertEqual("git.destructive", claude_force.operation if claude_force else None)
         self.assertEqual("export.overwrite", overwrite.operation if overwrite else None)
 
     def test_expired_approval_is_not_consumed(self) -> None:

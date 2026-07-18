@@ -9,8 +9,9 @@ __pycache__/
 dist/
 build/
 
-# Generated local Kiro configurations
+# Generated local client configurations
 .kiro/agents/
+.claude/skills/gamedev-agent/
 
 # Local GameDevAgent runtime data
 state/sessions/

@@ -16,6 +16,9 @@
       "allowedTools": ["read"],
       "toolsSettings": {"subagent": {"availableAgents": ["blender-modeler", "blender-materials", "blender-scene-composer", "blender-exporter", "unity-scene-builder", "unity-gameplay-programmer", "unity-physics-engineer", "unity-ui-programmer", "unity-build-engineer", "unity-qa-tester", "asset-researcher", "release-engineer"], "trustedAgents": ["asset-researcher", "unity-qa-tester"]}},
       "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    },
+    "claudeCli": {
+      "tools": ["Read", "Write", "Edit", "Bash", "Agent"]
     }
   }
 }

@@ -15,6 +15,10 @@
       "tools": ["read", "write", "shell", "@blender"],
       "allowedTools": ["read"],
       "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    },
+    "claudeCli": {
+      "tools": ["Read", "Write", "Edit", "Bash", "mcp__blender__*"],
+      "mcpServers": {"blender": {"command": "{{aim:env:GAMEDEV_BLENDER_MCP_COMMAND:blender-mcp}}", "args": []}}
     }
   }
 }
