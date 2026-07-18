@@ -88,6 +88,44 @@ class TaskDifficultyTests(unittest.TestCase):
         self.assertEqual(DifficultyLevel.COMPLEX, generation.difficulty)
         self.assertEqual(DifficultyLevel.TRIVIAL, edit.difficulty)
 
+    def test_expensive_routes_select_only_applicable_stages(self) -> None:
+        final_render = classify_task(
+            "Render the existing scene as a final render",
+            state=TaskState(target_exists=True),
+        )
+        simulation = classify_task(
+            "Simulate cloth on the existing character",
+            state=TaskState(target_exists=True),
+        )
+        composition = classify_task(
+            "Adjust the existing full scene composition",
+            state=TaskState(target_exists=True),
+        )
+        export = classify_task(
+            "Update multiple objects then export them",
+            state=TaskState(target_exists=True),
+        )
+
+        self.assertEqual(DifficultyLevel.COMPLEX, final_render.difficulty)
+        self.assertIn("final-render", final_render.allowed_stages)
+        self.assertIn("generation", final_render.skipped_stages)
+        self.assertNotIn("generation", final_render.allowed_stages)
+
+        self.assertEqual(ExecutionRoute.REBUILD, simulation.route)
+        self.assertIn("simulation", simulation.allowed_stages)
+        self.assertIn("generation", simulation.skipped_stages)
+        self.assertNotIn("generation", simulation.allowed_stages)
+
+        self.assertEqual(DifficultyLevel.COMPLEX, composition.difficulty)
+        self.assertEqual(ExecutionRoute.STAGED_EDIT, composition.route)
+        self.assertIn("preview-checkpoint", composition.allowed_stages)
+        self.assertIn("generation", composition.skipped_stages)
+        self.assertEqual((), composition.target_properties)
+
+        self.assertEqual(DifficultyLevel.STANDARD, export.difficulty)
+        self.assertIn("export", export.allowed_stages)
+        self.assertNotIn("export", export.skipped_stages)
+
     def test_explicit_overrides_win_without_removing_safety_gates(self) -> None:
         inferred = classify_task(
             "Inspect the scene in detail, do not render, within 45 seconds",

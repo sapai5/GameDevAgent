@@ -372,6 +372,13 @@ def _contains_any(text: str, terms: tuple[str, ...]) -> bool:
     return any(term in text for term in terms)
 
 
+def _contains_property_term(text: str, name: str) -> bool:
+    return any(
+        re.search(rf"(?<!\\w){re.escape(term)}(?!\\w)", text) is not None
+        for term in _PROPERTY_TERMS[name]
+    )
+
+
 def _resolve_overrides(text: str, supplied: TaskOverrides | None) -> TaskOverrides:
     detail: ResponseDetail | None = None
     markers = [
@@ -408,7 +415,7 @@ def _resolve_overrides(text: str, supplied: TaskOverrides | None) -> TaskOverrid
 def _property_targets(text: str) -> tuple[str, ...]:
     targets: list[str] = []
     for name, properties in _PROPERTY_PATTERNS:
-        if _contains_any(text, _PROPERTY_TERMS[name]):
+        if _contains_property_term(text, name):
             targets.extend(properties)
     return tuple(dict.fromkeys(targets))
 
@@ -434,10 +441,14 @@ def _difficulty(score: int) -> DifficultyLevel:
 
 def _stage_plan(
     route: ExecutionRoute,
+    difficulty: DifficultyLevel,
     *,
     render_allowed: bool,
+    generation: bool,
     simulation: bool,
     final_render: bool,
+    broad_validation: bool,
+    export_requested: bool,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     expensive = (
         "generation",
@@ -457,31 +468,51 @@ def _stage_plan(
             "verify-targeted-properties",
             "persist-authoritative-state",
         ), expensive
-    if route is ExecutionRoute.STAGED_EDIT:
-        return (
+    if difficulty is not DifficultyLevel.COMPLEX:
+        stages = [
             "plan-local-work",
             "evaluate-safety-gates",
             "apply-staged-edits",
-            "targeted-validation",
-            "persist-authoritative-state",
-        ), expensive
+        ]
+        if export_requested:
+            stages.append("export")
+        stages.extend(
+            (
+                "broad-validation" if broad_validation else "targeted-validation",
+                "persist-authoritative-state",
+            )
+        )
+        staged_skipped = ["generation", "simulation", "preview-render", "final-render"]
+        if not export_requested:
+            staged_skipped.append("export")
+        if not broad_validation:
+            staged_skipped.append("broad-validation")
+        return tuple(stages), tuple(staged_skipped)
 
     stages = [
         "plan-with-estimates",
         "evaluate-safety-gates",
         "preview-checkpoint",
-        "generation",
     ]
+    if generation:
+        stages.append("generation")
     if simulation:
         stages.append("simulation")
     if final_render and render_allowed:
         stages.append("final-render")
+    if export_requested:
+        stages.append("export")
     stages.extend(("broad-validation", "persist-authoritative-state"))
+
     skipped: list[str] = []
+    if not generation:
+        skipped.append("generation")
     if not simulation:
         skipped.append("simulation")
     if not final_render or not render_allowed:
         skipped.extend(("preview-render", "final-render"))
+    if not export_requested:
+        skipped.append("export")
     return tuple(stages), tuple(dict.fromkeys(skipped))
 
 
@@ -503,6 +534,7 @@ def _stage_budgets(
         "generation": 600.0,
         "simulation": 600.0,
         "final-render": 900.0,
+        "export": 120.0,
         "broad-validation": 300.0,
         "persist-authoritative-state": 30.0,
     }
@@ -526,9 +558,7 @@ def classify_task(
         text_without_no_render = text_without_no_render.replace(term, "")
 
     matched_property_groups = tuple(
-        name
-        for name, _ in _PROPERTY_PATTERNS
-        if _contains_any(positive_text, _PROPERTY_TERMS[name])
+        name for name, _ in _PROPERTY_PATTERNS if _contains_property_term(positive_text, name)
     )
     targets = _property_targets(positive_text)
     mutation = _contains_any(positive_text, _MUTATION_TERMS)
@@ -538,6 +568,7 @@ def classify_task(
     broad_composition = _contains_any(positive_text, _BROAD_COMPOSITION_TERMS)
     multi_object = _contains_any(positive_text, _MULTI_OBJECT_TERMS)
     broad_validation = _contains_any(positive_text, _BROAD_VALIDATION_TERMS)
+    export_requested = "export" in positive_text
     multi_stage = _contains_any(f" {positive_text} ", _MULTI_STAGE_TERMS)
     final_render = (
         "final render" in text_without_no_render
@@ -560,6 +591,11 @@ def classify_task(
         and not several_properties
         and not generation
         and not simulation
+        and not high_density
+        and not broad_composition
+        and not multi_object
+        and not broad_validation
+        and not multi_stage
         and not final_render
     )
     read_only = (
@@ -644,9 +680,13 @@ def classify_task(
 
     allowed_stages, skipped_stages = _stage_plan(
         route,
+        difficulty,
         render_allowed=render_allowed,
+        generation=generation,
         simulation=simulation,
         final_render=final_render,
+        broad_validation=broad_validation,
+        export_requested=export_requested,
     )
     stage_budgets = _stage_budgets(difficulty, allowed_stages)
     default_active_limit = {
