@@ -6,11 +6,18 @@ import json
 import re
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
 
 from .storage import JsonObject, JsonStore, StateError
+
+try:
+    from datetime import UTC
+except ImportError:  # Python 3.10 and earlier can invoke the generated safety hook.
+    from datetime import timezone
+
+    UTC = timezone.utc  # noqa: UP017  # Compatibility fallback for Python 3.10 and earlier.
 
 
 @dataclass(frozen=True)
