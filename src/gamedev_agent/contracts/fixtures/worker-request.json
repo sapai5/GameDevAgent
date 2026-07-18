@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "kind": "resource.estimate",
+  "request_id": "fixture-request-1",
+  "payload": {
+    "vertex_count": 1000,
+    "triangle_count": 500,
+    "texture_bytes": 4096,
+    "instance_count": 12
+  }
+}

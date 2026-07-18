@@ -9,6 +9,19 @@ __pycache__/
 dist/
 build/
 
+# TypeScript and Rust build outputs
+node_modules/
+web/dist/
+target/
+
+# Local derived databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
 # Generated local client configurations
 .kiro/agents/
 .claude/skills/gamedev-agent/
