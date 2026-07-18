@@ -142,6 +142,19 @@ The same workflows are available as namespaced Claude Code skills:
 
 Before starting work, the project manager checks for an active session. It resumes existing work instead of creating a duplicate pipeline.
 
+## Adaptive execution budgets
+
+Before starting an agent, `gamedev run` deterministically classifies the request and records an explainable execution route and budget. Bounded queries and existing-property edits can avoid broad pipelines, while generation, simulation, and rendering receive staged estimates and checkpoints. Startup and queue delay remain separate from active execution time, and every route retains applicable safety gates.
+
+Use explicit controls when needed:
+
+```bash
+gamedev run --detail brief --deadline-seconds 60 --no-render \
+  "Change the existing Blender scene resolution from 4K to 2K"
+```
+
+See [`docs/architecture/task-execution-policy.md`](docs/architecture/task-execution-policy.md) for classification scores, routes, timing semantics, overrides, fast-path boundaries, and safety invariants.
+
 ## Headless execution
 
 Headless mode uses Claude Code `--print` and grants no trust unless you request it:
