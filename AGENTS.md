@@ -46,3 +46,10 @@ Run these focused checks after code or capability changes:
    `claude plugin validate .claude/skills/gamedev-agent --strict`
 
 For changes that affect a real Blender or Unity adapter, also run `gamedev doctor` and one small interactive scene pipeline with both applications running. This application integration check is environment-dependent and MUST NOT be simulated as a successful live check.
+
+## Repository workflow
+
+- Automated agents MUST use feature branches and pull requests unless `@sapai5` explicitly directs a direct `main` update.
+- Automated agents MUST NOT approve or merge pull requests unless `@sapai5` explicitly requests that action.
+- `@sapai5` is the sole CODEOWNER; non-admin changes targeting `main` require their approval.
+- Future collaborators MUST NOT receive the Admin role unless they are intentionally authorized to bypass `main` protection.
