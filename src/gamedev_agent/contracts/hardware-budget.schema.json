@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gamedev-agent.local/contracts/hardware-budget.schema.json",
+  "title": "GameDevAgent hardware budget",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["max_wall_ms", "max_cpu_ms", "max_rss_bytes", "max_output_bytes"],
+  "properties": {
+    "max_wall_ms": {"type": "integer", "minimum": 1},
+    "max_cpu_ms": {"type": "integer", "minimum": 1},
+    "max_rss_bytes": {"type": "integer", "minimum": 1},
+    "max_gpu_ms": {"type": ["integer", "null"], "minimum": 1},
+    "max_vram_bytes": {"type": ["integer", "null"], "minimum": 1},
+    "max_read_bytes": {"type": ["integer", "null"], "minimum": 0},
+    "max_write_bytes": {"type": ["integer", "null"], "minimum": 0},
+    "max_output_bytes": {"type": "integer", "minimum": 1}
+  }
+}

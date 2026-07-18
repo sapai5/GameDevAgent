@@ -2,12 +2,17 @@
 
 ## Purpose
 
-This repository contains a dependency-free Python CLI, shared AIM-style agent specs, granular skills, and persistent Blender-to-Unity pipeline definitions for both Kiro CLI and Claude Code.
+This repository contains a dependency-free Python control-plane CLI, shared AIM-style agent specs, granular skills, persistent Blender-to-Unity pipelines, and optional SQL, TypeScript, and Rust components behind versioned contracts.
 
 ## Conventions
 
 - Python requires 3.11 or newer and uses `src/gamedev_agent`.
 - Runtime code MUST remain free of third-party Python dependencies unless a concrete adapter requires one.
+- Python is the control plane and owns orchestration, policy, MCP/provider adapters, and authoritative-state writes.
+- SQLite/SQL is rebuildable derived AI memory; it MUST NOT replace `state/manifest.json` or session authority.
+- TypeScript is presentation-only and MUST NOT duplicate pipeline, approval, license, or validation rules.
+- Rust is limited to profiled deterministic workers over versioned JSONL envelopes; workers MUST NOT mutate authoritative state directly.
+- Cross-language contracts live under `src/gamedev_agent/contracts/` and require shared fixtures and schema-version checks.
 - `agents/*.agent-spec.json`, `skills/`, and `agent-sops/` are shared source; client-native files MUST be generated from them rather than maintained as divergent copies.
 - `state/manifest.json` is the auditable source of truth and remains versioned.
 - `state/sessions/`, `state/approvals.json`, `.kiro/agents/`, `.claude/skills/gamedev-agent/`, and `logs/*.jsonl` are local runtime data and remain ignored.
@@ -29,8 +34,14 @@ Run these focused checks after code or capability changes:
    `PYTHONPATH=src python -m gamedev_agent.cli eval`
 3. Python syntax smoke check:
    `python -m compileall -q src hooks`
-4. Agent, skill, or SOP validators when those files change.
-5. Generate both adapters and validate the Claude plugin:
+4. TypeScript boundary checks when `web/` changes:
+   `npm --prefix web ci && npm --prefix web test`
+5. Rust worker checks when `crates/` or `Cargo.toml` changes:
+   `cargo fmt --all --check`
+   `cargo clippy --workspace --all-targets -- -D warnings`
+   `cargo test --workspace`
+6. Agent, skill, or SOP validators when those files change.
+7. Generate both adapters and validate the Claude plugin:
    `gamedev agents install --client all`
    `claude plugin validate .claude/skills/gamedev-agent --strict`
 

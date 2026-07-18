@@ -13,6 +13,18 @@ GameDevAgent is a native Claude Code plugin and local CLI for building Blender a
 - Resumes interrupted work from persistent pipeline sessions instead of relying on conversation history.
 - Blocks destructive Git commands, Blender or Unity deletion, and export overwrites without a matching one-time approval.
 
+## Architecture boundaries
+
+GameDevAgent keeps Python as the control plane and introduces other languages only behind stable contracts:
+
+- **Python** owns the CLI, orchestration, policy, MCP/provider adapters, and authoritative-state writes.
+- **SQLite/SQL** stores rebuildable RAG memory, graph projections, retrieval traces, and hardware samples. The JSON manifest remains authoritative.
+- **TypeScript** provides a framework-neutral contract package for a future local web console; it does not duplicate control-plane rules.
+- **Rust** provides optional JSONL subprocess workers for profiled deterministic kernels. Python remains the correctness fallback.
+- **JSON Schema** defines versioned envelopes and resource budgets shared by every language.
+
+See [`docs/architecture/polyglot-boundaries.md`](docs/architecture/polyglot-boundaries.md) for authority, packaging, testing, and adoption rules.
+
 ## Claude Code plugin
 
 The generated plugin contains:
