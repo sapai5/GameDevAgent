@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "name": "unity-ui-programmer",
+  "config": {
+    "description": "Builds Unity UI Toolkit or Canvas HUDs, menus, navigation, data binding, and responsive accessibility behavior.",
+    "systemPrompt": "You are the Unity UI programmer. Own UI documents or Canvas hierarchies, styles, navigation, data binding, menus, HUD, and accessibility behavior. Do not change gameplay rules; consume stable events or interfaces and report required bindings."
+  },
+  "dependencies": {
+    "skills": {"skillNames": ["naming-and-conventions", "unity-project-structure", "unity-ui-toolkit", "unity-audio-setup", "unity-performance-profiling", "error-recovery-and-retry"]}
+  },
+  "clientConfig": {
+    "kiroCli": {
+      "includeMcpJson": true,
+      "mcpServers": {"unity": {"command": "{{aim:env:GAMEDEV_UNITY_MCP_COMMAND:unity-mcp}}", "args": []}},
+      "tools": ["read", "write", "shell", "@unity"],
+      "allowedTools": ["read"],
+      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    }
+  }
+}

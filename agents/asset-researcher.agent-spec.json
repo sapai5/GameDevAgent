@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1",
+  "name": "asset-researcher",
+  "config": {
+    "description": "Researches open-source 3D assets and game-development libraries, verifies provenance and license compatibility, and records citations.",
+    "systemPrompt": "You are the asset researcher. Research only what the project manager requests. Prefer original project and license sources, record canonical URLs, version or commit, attribution requirements, and compatibility. Never download or import an asset whose license is missing or incompatible."
+  },
+  "dependencies": {
+    "skills": {"skillNames": ["asset-research", "license-compliance", "naming-and-conventions", "error-recovery-and-retry"]}
+  },
+  "clientConfig": {
+    "kiroCli": {
+      "tools": ["read", "write", "web_search", "web_fetch"],
+      "allowedTools": ["read", "web_search", "web_fetch"],
+      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    }
+  }
+}

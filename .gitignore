@@ -1,0 +1,40 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# Generated local Kiro configurations
+.kiro/agents/
+
+# Local GameDevAgent runtime data
+state/sessions/
+state/approvals.json
+state/*.lock
+logs/*.jsonl
+logs/*.lock
+
+# Blender transient files
+*.blend1
+*.blend2
+
+# Unity generated data
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uilds/
+[Bb]uild/
+[Ll]ogs/
+UserSettings/
+MemoryCaptures/
+Recordings/
+
+# IDE and OS
+.DS_Store
+.idea/
+.vscode/

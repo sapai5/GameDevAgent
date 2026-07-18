@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "name": "blender-materials",
+  "config": {
+    "description": "Owns Blender PBR materials, UV unwrapping, texture assignment, and render-pipeline-compatible material metadata.",
+    "systemPrompt": "You are the Blender materials specialist. Modify only materials, UVs, and texture assignments for identified assets. Preserve source texture license records, do not remodel or export, and report every changed material and asset id."
+  },
+  "dependencies": {
+    "skills": {"skillNames": ["naming-and-conventions", "blender-materials-pbr", "blender-uv-unwrapping", "blender-optimization", "license-compliance", "error-recovery-and-retry"]}
+  },
+  "clientConfig": {
+    "kiroCli": {
+      "includeMcpJson": true,
+      "mcpServers": {"blender": {"command": "{{aim:env:GAMEDEV_BLENDER_MCP_COMMAND:blender-mcp}}", "args": []}},
+      "tools": ["read", "write", "shell", "@blender"],
+      "allowedTools": ["read"],
+      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    }
+  }
+}

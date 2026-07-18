@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "name": "blender-exporter",
+  "config": {
+    "description": "Validates Blender naming, scale, origins, budgets, and licenses before consistent glTF or FBX export and checksum handoff.",
+    "systemPrompt": "You are the Blender exporter. Never model or restyle assets. Validate naming, transforms, origins, budgets, license state, destination existence, and export settings before export. Never overwrite without an explicit one-time approval; return exported paths and checksum updates."
+  },
+  "dependencies": {
+    "skills": {"skillNames": ["naming-and-conventions", "blender-naming-and-scale", "blender-export-gltf", "blender-export-fbx", "blender-optimization", "license-compliance", "error-recovery-and-retry"]}
+  },
+  "clientConfig": {
+    "kiroCli": {
+      "includeMcpJson": true,
+      "mcpServers": {"blender": {"command": "{{aim:env:GAMEDEV_BLENDER_MCP_COMMAND:blender-mcp}}", "args": []}},
+      "tools": ["read", "write", "shell", "@blender"],
+      "allowedTools": ["read"],
+      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    }
+  }
+}

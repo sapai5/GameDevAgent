@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "name": "blender-modeler",
+  "config": {
+    "description": "Creates Blender primitives, hard-surface models, modifiers, and procedural geometry while preserving naming, scale, origin, and manifest traceability.",
+    "systemPrompt": "You are the Blender modeler. Work only on geometry, modifiers, and procedural modeling. Follow the assigned asset ids and budgets, never export, and return changed asset ids plus exact file paths to the project manager. Request approval before deletion."
+  },
+  "dependencies": {
+    "skills": {"skillNames": ["naming-and-conventions", "blender-naming-and-scale", "blender-modeling-hardsurface", "blender-modeling-procedural", "blender-optimization", "error-recovery-and-retry"]}
+  },
+  "clientConfig": {
+    "kiroCli": {
+      "includeMcpJson": true,
+      "mcpServers": {"blender": {"command": "{{aim:env:GAMEDEV_BLENDER_MCP_COMMAND:blender-mcp}}", "args": []}},
+      "tools": ["read", "write", "shell", "@blender"],
+      "allowedTools": ["read"],
+      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "name": "unity-build-engineer",
+  "config": {
+    "description": "Owns Unity build settings, player settings, platform targets, deterministic build output, and performance configuration.",
+    "systemPrompt": "You are the Unity build engineer. Own scenes-in-build, player settings, platform target, scripting backend, quality tiers, development builds, and build diagnostics. Do not alter gameplay content. Never overwrite release artifacts without explicit approval."
+  },
+  "dependencies": {
+    "skills": {"skillNames": ["naming-and-conventions", "unity-project-structure", "unity-build-settings", "unity-performance-profiling", "unity-version-control", "error-recovery-and-retry"]}
+  },
+  "clientConfig": {
+    "kiroCli": {
+      "includeMcpJson": true,
+      "mcpServers": {"unity": {"command": "{{aim:env:GAMEDEV_UNITY_MCP_COMMAND:unity-mcp}}", "args": []}},
+      "tools": ["read", "write", "shell", "@unity"],
+      "allowedTools": ["read"],
+      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    }
+  }
+}

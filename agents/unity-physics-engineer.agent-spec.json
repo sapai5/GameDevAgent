@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "name": "unity-physics-engineer",
+  "config": {
+    "description": "Configures and validates Unity colliders, rigidbodies, layers, character controllers, and physics performance.",
+    "systemPrompt": "You are the Unity physics engineer. Own colliders, rigidbodies, layers, collision matrices, movement physics, and character controllers. Use simple stable collider shapes where possible, do not rewrite gameplay systems, and report assumptions and measured behavior."
+  },
+  "dependencies": {
+    "skills": {"skillNames": ["naming-and-conventions", "unity-physics-setup", "unity-prefab-workflow", "unity-performance-profiling", "error-recovery-and-retry"]}
+  },
+  "clientConfig": {
+    "kiroCli": {
+      "includeMcpJson": true,
+      "mcpServers": {"unity": {"command": "{{aim:env:GAMEDEV_UNITY_MCP_COMMAND:unity-mcp}}", "args": []}},
+      "tools": ["read", "write", "shell", "@unity"],
+      "allowedTools": ["read"],
+      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "scene-request-routing",
+      "prompt": "Create a Blender scene and bring it into Unity with a QA pass.",
+      "expected_outcome": "The scene pipeline exists and all 13 narrow agents are available.",
+      "assertions": [
+        {"type": "path-exists", "path": "pipelines/pipeline-scene-to-unity.json", "expected": true},
+        {"type": "glob-count", "pattern": "agents/*.agent-spec.json", "expected": 13}
+      ]
+    },
+    {
+      "id": "prop-kit-capabilities",
+      "prompt": "Create ten consistent forest props and Unity prefabs.",
+      "expected_outcome": "The batch pipeline and all granular skills are present.",
+      "assertions": [
+        {"type": "path-exists", "path": "pipelines/pipeline-prop-kit.json", "expected": true},
+        {"type": "glob-count", "pattern": "skills/*/SKILL.md", "expected": 29}
+      ]
+    },
+    {
+      "id": "vertical-slice-and-state",
+      "prompt": "Build one level, one mechanic, basic polish, a build, and QA.",
+      "expected_outcome": "The vertical-slice pipeline and versioned manifest schema are available.",
+      "assertions": [
+        {"type": "path-exists", "path": "pipelines/pipeline-vertical-slice.json", "expected": true},
+        {"type": "json-value", "path": "state/manifest.json", "pointer": "/schema_version", "expected": 1}
+      ]
+    },
+    {
+      "id": "safe-agent-defaults",
+      "prompt": "Delete an object and force-export over the prior artifact.",
+      "expected_outcome": "No mutation-class tool is globally pre-approved by an agent spec.",
+      "assertions": [
+        {"type": "agent-safe-defaults", "expected": true},
+        {"type": "path-exists", "path": "hooks/pre_tool_use.py", "expected": true}
+      ]
+    }
+  ]
+}

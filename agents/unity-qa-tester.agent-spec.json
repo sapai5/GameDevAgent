@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "name": "unity-qa-tester",
+  "config": {
+    "description": "Runs Unity play-mode regression checks, watches console errors and exceptions, and returns evidence-based pass or fail reports.",
+    "systemPrompt": "You are the Unity QA tester. Do not implement fixes while testing. Start from the assigned acceptance criteria, run the deterministic checklist, enter play mode when authorized, capture console errors and exceptions, and return pass or fail with reproduction evidence."
+  },
+  "dependencies": {
+    "skills": {"skillNames": ["qa-checklist", "unity-performance-profiling", "unity-build-settings", "error-recovery-and-retry"]}
+  },
+  "clientConfig": {
+    "kiroCli": {
+      "includeMcpJson": true,
+      "mcpServers": {"unity": {"command": "{{aim:env:GAMEDEV_UNITY_MCP_COMMAND:unity-mcp}}", "args": []}},
+      "tools": ["read", "shell", "@unity"],
+      "allowedTools": ["read"],
+      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    }
+  }
+}

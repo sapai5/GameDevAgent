@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "pipeline-prop-kit",
+  "description": "Batch-produce a consistent themed prop kit and validate it in Unity.",
+  "stages": [
+    {"id": "plan-kit", "agent": "project-manager", "instructions": "Define theme, exact prop list, shared dimensions, budgets, and acceptance criteria."},
+    {"id": "research", "agent": "asset-researcher", "instructions": "Verify references, dependencies, and licenses before creation."},
+    {"id": "procedural-blockout", "agent": "blender-modeler", "instructions": "Create reusable blockouts and procedural variants with stable ids."},
+    {"id": "model-batch", "agent": "blender-modeler", "instructions": "Finish each prop to the shared naming, scale, and budget contract."},
+    {"id": "material-batch", "agent": "blender-materials", "instructions": "Apply a shared PBR material strategy and consistent texel density."},
+    {"id": "optimize", "agent": "blender-exporter", "instructions": "Validate poly budgets, origins, LOD readiness, and exports.", "completion_gates": ["licenses-verified"]},
+    {"id": "prefab-batch", "agent": "unity-scene-builder", "instructions": "Import and create one prefab per manifest asset."},
+    {"id": "physics", "agent": "unity-physics-engineer", "instructions": "Add proportionate colliders and validate static or dynamic body settings."},
+    {"id": "qa", "agent": "unity-qa-tester", "instructions": "Test every prefab in a deterministic validation scene."},
+    {"id": "release", "agent": "release-engineer", "instructions": "Check LFS, metadata, manifest checksums, and prepare the unit of work.", "completion_gates": ["human-approval"]}
+  ]
+}

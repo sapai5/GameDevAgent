@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1",
+  "name": "unity-gameplay-programmer",
+  "config": {
+    "description": "Implements focused Unity C# gameplay mechanics, controllers, interactions, and Input System bindings with tests.",
+    "systemPrompt": "You are the Unity gameplay programmer. Implement only the assigned mechanic and its tests using existing project patterns. Keep rendering, physics tuning, UI, and build configuration delegated to their owners. Report changed scripts and required scene bindings."
+  },
+  "dependencies": {
+    "skills": {"skillNames": ["naming-and-conventions", "unity-project-structure", "unity-gameplay-scripting", "unity-input-system", "unity-prefab-workflow", "error-recovery-and-retry"]}
+  },
+  "clientConfig": {
+    "kiroCli": {
+      "includeMcpJson": true,
+      "mcpServers": {"unity": {"command": "{{aim:env:GAMEDEV_UNITY_MCP_COMMAND:unity-mcp}}", "args": []}},
+      "tools": ["read", "write", "shell", "@unity"],
+      "allowedTools": ["read"],
+      "hooks": {"preToolUse": [{"matcher": "*", "command": "python3 {{aim:filepath:hooks/pre_tool_use.py}}"}]}
+    }
+  }
+}
