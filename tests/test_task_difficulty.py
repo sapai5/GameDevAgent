@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from gamedev_agent.change_impact import ChangeDomain
 from gamedev_agent.cli import build_parser, main
 from gamedev_agent.runtime import AgentRunResult
 from gamedev_agent.task_difficulty import (
@@ -178,6 +179,7 @@ class TaskDifficultyTests(unittest.TestCase):
             ),
             assessment.target_properties,
         )
+        self.assertEqual((ChangeDomain.RENDER_SETTINGS,), assessment.declared_change_domains)
         self.assertIn("mutate-properties", assessment.allowed_stages)
         self.assertIn("verify-targeted-properties", assessment.allowed_stages)
         self.assertEqual(60, assessment.budget.active_limit_seconds)
@@ -275,8 +277,11 @@ class TaskDifficultyTests(unittest.TestCase):
         directive = assessment.prompt_directive()
 
         self.assertEqual(1, serialized["schema_version"])
+        self.assertEqual(1, serialized["change_impact"]["schema_version"])
+        self.assertEqual([], serialized["change_impact"]["declared_domains"])
         self.assertIn('"schema_version":1', directive)
         self.assertIn("never execute skipped_stages", directive)
+        self.assertIn("blocked plans cannot pass on stale evidence", directive)
         self.assertIn("may not be bypassed", directive)
 
 
@@ -326,6 +331,10 @@ class TaskDifficultyCliTests(unittest.TestCase):
         ]
         self.assertEqual("task-preflight-classified", records[0]["event"])
         self.assertEqual("property-edit", records[0]["details"]["route"])
+        self.assertEqual(
+            ["render-settings"],
+            records[0]["details"]["change_impact"]["declared_domains"],
+        )
         self.assertEqual(60, records[0]["details"]["budget"]["active_limit_seconds"])
 
 

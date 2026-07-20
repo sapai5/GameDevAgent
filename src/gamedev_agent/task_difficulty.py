@@ -10,6 +10,13 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
+from .change_impact import (
+    IMPACT_SCHEMA_VERSION,
+    SAFETY_GATES,
+    ChangeDomain,
+    infer_change_domains,
+)
+
 SCHEMA_VERSION = 1
 
 
@@ -32,14 +39,6 @@ class ResponseDetail(StrEnum):
     NORMAL = "normal"
     DETAILED = "detailed"
 
-
-SAFETY_GATES = (
-    "license-integrity",
-    "provenance-integrity",
-    "spatial-integrity",
-    "required-approvals",
-    "authoritative-state-integrity",
-)
 
 _PROPERTY_PATTERNS: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
@@ -273,6 +272,7 @@ class TaskAssessment:
     response_detail: ResponseDetail
     render_allowed: bool
     target_properties: tuple[str, ...]
+    declared_change_domains: tuple[ChangeDomain, ...]
     allowed_stages: tuple[str, ...]
     skipped_stages: tuple[str, ...]
     required_safety_gates: tuple[str, ...]
@@ -295,6 +295,11 @@ class TaskAssessment:
             "response_detail": self.response_detail.value,
             "render_allowed": self.render_allowed,
             "target_properties": list(self.target_properties),
+            "change_impact": {
+                "schema_version": IMPACT_SCHEMA_VERSION,
+                "declared_domains": [domain.value for domain in self.declared_change_domains],
+                "observation_required": bool(self.declared_change_domains),
+            },
             "allowed_stages": list(self.allowed_stages),
             "skipped_stages": list(self.skipped_stages),
             "required_safety_gates": list(self.required_safety_gates),
@@ -306,8 +311,11 @@ class TaskAssessment:
         return (
             "Python preflight execution contract (authoritative routing policy):\n"
             f"{serialized}\n"
-            "Execute only allowed_stages; never execute skipped_stages. Required safety gates "
-            "remain mandatory when applicable and may not be bypassed to meet a deadline."
+            "Execute only allowed_stages; never execute skipped_stages. Before validating a "
+            "mutation, reconcile declared change domains with observed before/after fingerprints "
+            "through the Python impact planner; blocked plans cannot pass on stale evidence. "
+            "Required safety gates remain mandatory when applicable and may not be bypassed to "
+            "meet a deadline."
         )
 
 
@@ -605,6 +613,7 @@ def classify_task(
         and not simulation
         and not final_render
     )
+    declared_change_domains = () if read_only else infer_change_domains(positive_text)
 
     factors: list[ClassificationFactor] = []
     if read_only:
@@ -728,6 +737,7 @@ def classify_task(
         response_detail=resolved.detail or ResponseDetail.NORMAL,
         render_allowed=render_allowed,
         target_properties=targets if bounded_property else (),
+        declared_change_domains=declared_change_domains,
         allowed_stages=allowed_stages,
         skipped_stages=skipped_stages,
         required_safety_gates=SAFETY_GATES,
