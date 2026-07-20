@@ -1,9 +1,5 @@
 # Task execution policy
 
-## Status
-
-Accepted for [issue #65](https://github.com/sapai5/GameDevAgent/issues/65). The executable source of truth is `src/gamedev_agent/task_difficulty.py`; this document explains that policy and MUST change with its behavior and tests.
-
 ## Decision
 
 Python classifies every `gamedev run` request before agent execution. Classification is deterministic and based on normalized request text plus explicit task state. It does not use an opaque model self-rating.
@@ -15,10 +11,9 @@ The preflight result is a schema-versioned contract containing:
 - execution route
 - allowed and skipped stages
 - target properties for bounded edits
+- initial change-domain write set for mutations
 - required safety gates
 - active, startup, queue, deadline, and per-stage budget evidence
-
-The project-manager agent follows this contract but does not own or duplicate its policy. For mutations, the preflight also declares an initial change-domain write set; observed tool fingerprints are reconciled by the separate [change-impact validation policy](change-impact-validation.md) before validation evidence can pass.
 
 ## Difficulty classification
 

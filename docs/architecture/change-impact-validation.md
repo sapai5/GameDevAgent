@@ -1,8 +1,6 @@
 # Change-impact validation routing
 
-## Status
-
-Accepted for [issue #70](https://github.com/sapai5/GameDevAgent/issues/70). The executable source of truth is `src/gamedev_agent/change_impact.py`. Impact plans are derived and rebuildable; `state/manifest.json` and session JSON remain authoritative.
+Impact plans are derived and rebuildable; `state/manifest.json` and session JSON remain authoritative.
 
 ## Contract
 
@@ -25,7 +23,7 @@ Every planned mutation declares a bounded write set using schema version 1. Tool
 gamedev impact plan --input impact-request.json
 ```
 
-The input can use `-` for stdin. The CLI emits canonical JSON and appends a `change-impact-planned` audit record. The Python planner is the only policy owner; agent prompts, TypeScript, and Rust do not duplicate the routing table.
+The input can use `-` for stdin. The CLI emits canonical JSON and appends a `change-impact-planned` audit record.
 
 ## Reconciliation
 
