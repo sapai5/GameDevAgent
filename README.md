@@ -155,6 +155,8 @@ gamedev run --detail brief --deadline-seconds 60 --no-render \
 
 See [`docs/architecture/task-execution-policy.md`](docs/architecture/task-execution-policy.md) for classification scores, routes, timing semantics, overrides, fast-path boundaries, and safety invariants.
 
+After a mutation, `gamedev impact plan --input <schema-v1.json>` reconciles declared and observed change domains, rejects missing or conflicting fingerprints, selects the minimum validation route, invalidates downstream evidence, and reuses only checksum-matched PASS results. See [`docs/architecture/change-impact-validation.md`](docs/architecture/change-impact-validation.md) for the domain graph and resume contract.
+
 ## Headless execution
 
 Headless mode uses Claude Code `--print` and grants no trust unless you request it:

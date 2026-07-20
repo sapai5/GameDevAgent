@@ -18,7 +18,7 @@ The preflight result is a schema-versioned contract containing:
 - required safety gates
 - active, startup, queue, deadline, and per-stage budget evidence
 
-The project-manager agent follows this contract but does not own or duplicate its policy.
+The project-manager agent follows this contract but does not own or duplicate its policy. For mutations, the preflight also declares an initial change-domain write set; observed tool fingerprints are reconciled by the separate [change-impact validation policy](change-impact-validation.md) before validation evidence can pass.
 
 ## Difficulty classification
 

@@ -8,6 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from gamedev_agent.change_impact import TRACKED_DOMAINS, fingerprint_value
 from gamedev_agent.cli import main
 from gamedev_agent.permissions import ApprovalStore
 from gamedev_agent.pipelines import PipelineCoordinator
@@ -126,6 +127,56 @@ class PipelineAndCliTests(unittest.TestCase):
         self.assertEqual(0, code)
         self.assertEqual("Unity/Assets/Crate.glb", updated["files"]["unity"])
         self.assertEqual("unity-scene-builder", updated["last_modified_by"])
+
+    def test_impact_plan_command_emits_and_audits_canonical_plan(self) -> None:
+        fingerprints = []
+        for domain in TRACKED_DOMAINS:
+            before = fingerprint_value({"domain": domain.value, "revision": 1})
+            after = fingerprint_value(
+                {
+                    "domain": domain.value,
+                    "revision": 2 if domain.value == "render-settings" else 1,
+                }
+            )
+            fingerprints.append({"domain": domain.value, "before": before, "after": after})
+        request_path = self.root / "impact-request.json"
+        request_path.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "declared_domains": ["render-settings"],
+                    "observed_domains": ["render-settings"],
+                    "fingerprints": fingerprints,
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            code = main(
+                [
+                    "--project",
+                    str(self.root),
+                    "impact",
+                    "plan",
+                    "--input",
+                    request_path.name,
+                ]
+            )
+
+        plan = json.loads(stdout.getvalue())
+        self.assertEqual(0, code)
+        self.assertEqual("ready", plan["status"])
+        self.assertEqual(["render-settings"], plan["changed_domains"])
+        selected = {item["node_id"] for item in plan["selected_nodes"]}
+        self.assertIn("validator.render-settings", selected)
+        records = [
+            json.loads(line)
+            for line in (self.root / "logs" / "audit.jsonl").read_text().splitlines()
+        ]
+        self.assertEqual("change-impact-planned", records[-1]["event"])
+        self.assertEqual(plan["plan_fingerprint"], records[-1]["details"]["plan_fingerprint"])
 
     def test_doctor_fails_fast_when_endpoints_are_unconfigured(self) -> None:
         stdout = io.StringIO()

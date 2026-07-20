@@ -11,6 +11,12 @@ from pathlib import Path
 from typing import Any, cast
 
 from . import __version__
+from .change_impact import (
+    ChangeImpactError,
+    ChangeImpactPlanner,
+    ImpactRequest,
+    ImpactStatus,
+)
 from .evals import EvaluationRunner
 from .mcp import HttpJsonRpcTransport, McpAdapter, McpError
 from .permissions import ApprovalStore
@@ -284,6 +290,26 @@ def command_agents_install(args: argparse.Namespace, root: Path) -> int:
     return 0
 
 
+def command_impact_plan(args: argparse.Namespace, root: Path) -> int:
+    if args.input == "-":
+        serialized = sys.stdin.buffer.read()
+    else:
+        input_path = Path(args.input)
+        if not input_path.is_absolute():
+            input_path = root / input_path
+        serialized = input_path.read_bytes()
+    request = ImpactRequest.from_json(serialized)
+    plan = ChangeImpactPlanner().plan(request)
+    AuditLogger(root).record(
+        event="change-impact-planned",
+        actor=args.actor,
+        outcome="success" if plan.status is ImpactStatus.READY else plan.status.value,
+        details=plan.to_dict(),
+    )
+    _json(plan.to_dict())
+    return 0 if plan.status is ImpactStatus.READY else 1
+
+
 def command_run(args: argparse.Namespace, root: Path) -> int:
     manifest = ManifestStore(root).initialize()
     coordinator = PipelineCoordinator(root)
@@ -413,6 +439,13 @@ def build_parser() -> argparse.ArgumentParser:
     evaluate.add_argument("--case")
     evaluate.set_defaults(handler=command_eval)
 
+    impact = commands.add_parser("impact", help="plan validation from observed change evidence")
+    impact_commands = impact.add_subparsers(dest="impact_command", required=True)
+    impact_plan = impact_commands.add_parser("plan")
+    impact_plan.add_argument("--input", required=True, help="schema-v1 JSON file or - for stdin")
+    impact_plan.add_argument("--actor", default="project-manager")
+    impact_plan.set_defaults(handler=command_impact_plan)
+
     run = commands.add_parser("run", help="execute a request through the project-manager agent")
     run.add_argument("request", help="the game-development outcome to create")
     run.add_argument(
@@ -537,7 +570,7 @@ def main(argv: list[str] | None = None) -> int:
     root = (args.project or find_project_root(Path.cwd())).resolve()
     try:
         return int(args.handler(args, root))
-    except (StateError, McpError, json.JSONDecodeError, OSError) as error:
+    except (ChangeImpactError, StateError, McpError, json.JSONDecodeError, OSError) as error:
         print(f"gamedev: {error}", file=sys.stderr)
         return 2
 
